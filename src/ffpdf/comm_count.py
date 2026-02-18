@@ -14,7 +14,7 @@ from .data.utils import (
 
 
 def comm_count(pdfs: list[Path]) -> None:
-    pdfs: list[Path] = expand_input_paths(pdfs)
+    pdfs = expand_input_paths(pdfs)
 
     # print header
     if pdfs:

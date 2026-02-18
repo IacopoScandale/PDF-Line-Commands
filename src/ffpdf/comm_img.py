@@ -17,7 +17,7 @@ from .data.utils import (
 
 
 def comm_img(files: list[Path]) -> None | NoReturn:
-    files: list[Path] = expand_input_paths(files)
+    files = expand_input_paths(files)
 
     # print header
     if files:

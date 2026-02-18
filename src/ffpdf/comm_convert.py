@@ -34,7 +34,7 @@ def comm_convert(
     in_files: list[Path],
     ext: str,
 ) -> None:
-    in_files: list[Path] = expand_input_paths(in_files)
+    in_files = expand_input_paths(in_files)
 
     # make sure ext is lowercase and starts with a dot
     ext = ext.lower()

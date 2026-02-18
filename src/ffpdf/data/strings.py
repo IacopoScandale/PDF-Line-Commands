@@ -18,6 +18,7 @@ SUBCOMMANDS: list[str] = [
     SUB_FORMAT := "format",
     SUB_DIM := "dim",
     SUB_EXT := "ext",
+    SUB_FIX_IMG_ROT := "fix-img-orientation"
     # SUB_RAW := "raw",
 ]
 SUB_COMPRESS_IMG: str = "img"

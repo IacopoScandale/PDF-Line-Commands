@@ -14,7 +14,7 @@ def print_content_line(filename: str = "", new_filename: str = "") -> None:
 def comm_format(
     files: list[Path], prefix: str | None = None, suffix: str | None = None
 ) -> None:
-    files: list[Path] = expand_input_paths(files)
+    files = expand_input_paths(files)
     arrow: str = "->"
 
     # print header

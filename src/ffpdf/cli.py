@@ -1,6 +1,7 @@
 from argparse import ArgumentParser, ArgumentTypeError, Namespace
 from pathlib import Path
 
+
 from .__main__ import show_infos
 from .comm_compress_img import comm_compress_img
 from .comm_compress_vid import comm_compress_vid
@@ -8,6 +9,7 @@ from .comm_convert import comm_convert
 from .comm_count import comm_count
 from .comm_dimensions import comm_dimensions
 from .comm_extensions import comm_extensions
+from .comm_fix_img_orientation import comm_fix_img_orientation
 from .comm_format import comm_format
 from .comm_img import comm_img
 from .comm_merge import comm_merge
@@ -23,6 +25,7 @@ from .data.strings import (
     SUB_COUNT,
     SUB_DIM,
     SUB_EXT,
+    SUB_FIX_IMG_ROT,
     SUB_FORMAT,
     SUB_IMG,
     SUB_MERGE,
@@ -336,6 +339,17 @@ def parse_arguments() -> Namespace:
         SUB_EXT, description="List the frequency of file extensions"
     )
 
+    # subcommand `fix img orientation`
+    subparser_fix_img_rot: ArgumentParser = subparsers.add_parser(
+        SUB_FIX_IMG_ROT, description="Fix the exif image orientation"
+    )
+    subparser_fix_img_rot.add_argument(
+        "in_files",
+        nargs="+",
+        type=Path,
+        help="Input file(s)",
+    )
+
     args: Namespace = parser.parse_args()
     return args
 
@@ -372,5 +386,7 @@ def main() -> None:
         comm_dimensions(args.ratio, args.width, args.height, args.n)
     elif args.subcommand == SUB_EXT:
         comm_extensions()
+    elif args.subcommand == SUB_FIX_IMG_ROT:
+        comm_fix_img_orientation(args.in_files)
     else:
         show_infos()
