@@ -1,7 +1,7 @@
 import os
 import sys
 from pathlib import Path
-from typing import Any, NoReturn
+from typing import Any
 
 from PIL import Image, UnidentifiedImageError
 from rich import print
@@ -54,7 +54,8 @@ def comm_compress_img(
     quality: int | str = "keep",
     new_dimensions: tuple[int, int] | None = None,
     resize_ratio: str | None = None,
-) -> None | NoReturn:
+    long_side: int | None = None,
+) -> None:
     """
     Parameters
     ----------
@@ -74,8 +75,14 @@ def comm_compress_img(
         Filter resize by image ratio e.g. `'4:3'` means that if
         `new_dimensions` is present, it will be applied only on 4:3
         images.
+
+    long_side : int | None = None
+        If this is not none, then all images passed in `files` will be
+        resized having the long side equal to `long_side` in pixels (clearly the
+        original longer side of the input image must be bigger than
+        `long_side`)
     """
-    files: list[Path] = expand_input_paths(files)
+    files = expand_input_paths(files)
 
     # print header
     if files:
@@ -89,16 +96,19 @@ def comm_compress_img(
             size_ratio="Size %",
             filename="Filename",
         )
-        print("—" * 80)  # em dash line separator
+        print("—" * 104)  # em dash line separator
 
     # print content
     total_size: int = 0
     total_compressed_size: int = 0
     total_files: int = len(files)
 
+    adapt_ratio: bool | None = None
+    new_ratio: tuple[int, int] | None = None
+
     if new_dimensions:
-        adapt_ratio: bool = -1 in new_dimensions
-        new_ratio: tuple[int, int] = ratio(*new_dimensions)
+        adapt_ratio = -1 in new_dimensions
+        new_ratio = ratio(*new_dimensions)
 
     for file in files:
         # skip directories
@@ -133,38 +143,57 @@ def comm_compress_img(
                     continue
 
                 img_ratio: tuple[int, int] = ratio(width, height)
-
                 new_file: Path = file.with_name(f"{COMMAND}_{file.name}")
+
+                was_resized: bool = False
+
+                if long_side:
+                    max_side: int = max(width, height)
+                    if max_side > long_side:
+                        if width > height:
+                            new_w: int = long_side
+                            new_h: int = round(height * (long_side / width))
+                        else:
+                            new_h: int = long_side
+                            new_w: int = round(width * (long_side / height))
+
+                        img = img.resize((new_w, new_h), Image.Resampling.LANCZOS)
+                        h_new_dim = human_readable_dimensions(new_w, new_h)
+                        was_resized = True
 
                 # resize img without stretch, and only if resize ratio
                 # filter is correct
-                if new_dimensions and new_dimensions < (width, height):
+                elif new_dimensions and new_dimensions < (width, height):
                     h_new_dim: str = human_readable_dimensions(*new_dimensions)
-                    if resize_ratio and resize_ratio == h_ratio:
+                    if resize_ratio and resize_ratio != h_ratio:
                         if adapt_ratio:
                             # respectively -1 value index and other value index
                             i, j = (0, 1) if new_dimensions[0] == -1 else (1, 0)
 
                             adapted_dim: list[int] = [0, 0]
-                            adapted_dim[i] = int(
-                                round(new_dimensions[j] * img_ratio[i] / img_ratio[j])
+                            adapted_dim[i] = round(
+                                new_dimensions[j] * img_ratio[i] / img_ratio[j]
                             )
                             adapted_dim[j] = new_dimensions[j]
 
                             if tuple(adapted_dim) < (width, height):
-                                img = img.resize(adapted_dim)
-
+                                img = img.resize(adapted_dim, Image.Resampling.LANCZOS)
                                 h_new_dim: str = human_readable_dimensions(*adapted_dim)
+                                was_resized = True
 
                         elif img_ratio == new_ratio and new_dimensions < (
                             width,
                             height,
                         ):
-                            img = img.resize(new_dimensions)
-
+                            img = img.resize(new_dimensions, Image.Resampling.LANCZOS)
                             h_new_dim: str = human_readable_dimensions(*new_dimensions)
+                            was_resized = True
 
-                params: dict[str, Any] = dict()
+                if not was_resized and quality == "keep":
+                    total_files -= 1
+                    continue
+
+                params: dict[str, Any] = {}
 
                 # copy metadata by default
                 exif = img.info.get("exif")
@@ -206,7 +235,7 @@ def comm_compress_img(
 
     # print footer
     if files and total_files > 1:
-        print("—" * 80)  # em dash line separator
+        print("—" * 104)  # em dash line separator
         print_content_line(
             size=human_readable_size(total_size),
             new_size=human_readable_size(total_compressed_size),

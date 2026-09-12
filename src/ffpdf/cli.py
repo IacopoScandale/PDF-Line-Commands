@@ -1,7 +1,6 @@
 from argparse import ArgumentParser, ArgumentTypeError, Namespace
 from pathlib import Path
 
-
 from .__main__ import show_infos
 from .comm_compress_img import comm_compress_img
 from .comm_compress_vid import comm_compress_vid
@@ -281,6 +280,17 @@ def parse_arguments() -> Namespace:
             + "if they match this specific ratio"
         ),
     )
+    subparser_compress_img.add_argument(
+        "-l",
+        "--long-side",
+        type=int,
+        default=None,
+        help=(
+            "Target length (in pixels) for the image's longest side after "
+            + "resizing. The other side is scaled proportionally. If the "
+            + "image is already smaller, nothing happens"
+        ),
+    )
 
     # subsubcommand `compress vid`
     subparser_compress_vid: ArgumentParser = subparsers_compress.add_parser(
@@ -335,7 +345,7 @@ def parse_arguments() -> Namespace:
     )
 
     # subcommand `ext`
-    subparser_extensions: ArgumentParser = subparsers.add_parser(
+    subparser_extensions: ArgumentParser = subparsers.add_parser(  # noqa: F841
         SUB_EXT, description="List the frequency of file extensions"
     )
 
@@ -377,7 +387,13 @@ def main() -> None:
         comm_vid(args.in_files)
     elif args.subcommand == SUB_COMPRESS:
         if args.subparser_compress == SUB_COMPRESS_IMG:
-            comm_compress_img(args.in_files, args.quality, args.size, args.resize_ratio)
+            comm_compress_img(
+                files=args.in_files, 
+                quality=args.quality, 
+                new_dimensions=args.size, 
+                resize_ratio=args.resize_ratio, 
+                long_side=args.long_side,
+            )
         elif args.subparser_compress == SUB_COMPRESS_VID:
             comm_compress_vid(args.in_files, args.ffmpeg, args.delete)
     elif args.subcommand == SUB_FORMAT:

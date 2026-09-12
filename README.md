@@ -148,7 +148,17 @@ ffpdf vid *.mp4
 
 ### Compress Img
 Compress images
+- Example: compress input images having the longer side exactly 2500px (`--long-side 2500`)
+  ```sh
+  ffpdf compress img * --long-side 2500
 
+        Size —> New Size        Size %       Ratio         Dim —> New Dim     Filename                      
+  ————————————————————————————————————————————————————————————————————————————————————————————————————————
+    4.48 MB —> 631.59 KB       13.8 %         3:4   3456×4608 —> 1875×2500   'IMG_20260826_110346.jpg'     
+    3.76 MB —> 415.60 KB       10.8 %         4:3   4608×3456 —> 2500×1875   'IMG_20260826_111818.jpg'     
+  ————————————————————————————————————————————————————————————————————————————————————————————————————————
+    8.25 MB —> 1.02 MB         12.4 %                                        '2 files compressed'
+  ```
 - Example: compress input image to 2000x1500 px (`-s 2000x1500`) with JPEG quality 75 (`-q 75`)
   ```sh
   ffpdf compress img "20200526_134236.jpg" -s 2000x1500 -q 75
