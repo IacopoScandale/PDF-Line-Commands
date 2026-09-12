@@ -169,6 +169,14 @@ def parse_arguments() -> Namespace:
             + "to replace the old suffix with the new one"
         ),
     )
+    parser_format.add_argument(
+        "--replace-files",
+        action="store_true",
+        help=(
+            "overwrite existing files (instead of skipping them) if the new "
+            + "filename already exists"
+        ),
+    )
 
     # subcommand `count`
     parser_count: ArgumentParser = subparsers.add_parser(
@@ -388,16 +396,21 @@ def main() -> None:
     elif args.subcommand == SUB_COMPRESS:
         if args.subparser_compress == SUB_COMPRESS_IMG:
             comm_compress_img(
-                files=args.in_files, 
-                quality=args.quality, 
-                new_dimensions=args.size, 
-                resize_ratio=args.resize_ratio, 
+                files=args.in_files,
+                quality=args.quality,
+                new_dimensions=args.size,
+                resize_ratio=args.resize_ratio,
                 long_side=args.long_side,
             )
         elif args.subparser_compress == SUB_COMPRESS_VID:
             comm_compress_vid(args.in_files, args.ffmpeg, args.delete)
     elif args.subcommand == SUB_FORMAT:
-        comm_format(args.in_files, args.prefix, args.suffix)
+        comm_format(
+            files=args.in_files,
+            prefix=args.prefix,
+            suffix=args.suffix,
+            replace_files=args.replace_files,
+        )
     elif args.subcommand == SUB_DIM:
         comm_dimensions(args.ratio, args.width, args.height, args.n)
     elif args.subcommand == SUB_EXT:

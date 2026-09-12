@@ -223,6 +223,64 @@ Apply the --ffmpeg inner command to all video files, skipping any others. Ignore
     · See ffmpeg output log at '/example_full_path/ffpdf/src/ffpdf/data/tmp/ffmpeg_compress_log.txt'
   ```
 
+### Format
+Add, remove or replace prefixes and suffixes from filenames, or move them to the beginning or end of the filename
+
+- Example: manipulate input files prefix and suffix
+```sh
+ffpdf format "prefix_filename_suffix.txt" -p "prefix_->A " -s "_suffix-> B"                 ✔ │ at 23:50:46 
+
+Filename                                 ——> New Filename                            
+————————————————————————————————————————————————————————————————————————————————
+'prefix_filename_suffix.txt'             ——> 'A filename B.txt'
+```
+
+```sh
+ffpdf format * -p "prefix_->A " -s "_suffix-> B"                                          ✔ │ at 23:51:47 
+
+Filename                                 ——> New Filename                            
+————————————————————————————————————————————————————————————————————————————————
+'IMG_20260826_113048.jpg'                                             
+'IMG_20260826_131828.jpg'                                             
+'prefix_filename_suffix.txt'             ——> 'A filename B.txt'
+```
+
+- Example: remove "IMG" prefix to all files that have it, then restore it:
+```sh
+ffpdf format * -p "IMG_->"
+
+Filename                                 ——> New Filename                            
+————————————————————————————————————————————————————————————————————————————————
+'IMG_20260826_113048.jpg'                ——> '20260826_113048.jpg'                   
+'IMG_20260826_131828.jpg'                ——> '20260826_131828.jpg'                   
+————————————————————————————————————————————————————————————————————————————————
+                                             '2 files renamed'
+```
+
+```sh
+ffpdf format * -p="->IMG_"  # this syntax requires the '='
+
+Filename                                 ——> New Filename                            
+————————————————————————————————————————————————————————————————————————————————
+'20260826_113048.jpg'                    ——> 'IMG_20260826_113048.jpg'               
+'20260826_131828.jpg'                    ——> 'IMG_20260826_131828.jpg'               
+————————————————————————————————————————————————————————————————————————————————
+                                             '2 files renamed'
+```
+
+
+
+- Example: overwrite compressed images replacing the original ones
+```sh
+ffpdf format * -p "ffpdf_->" --replace-files
+
+Filename                                 ——> New Filename                            
+————————————————————————————————————————————————————————————————————————————————
+'ffpdf_IMG_20260826_113048.jpg'          ——> 'IMG_20260826_113048.jpg'               
+'IMG_20260826_113048.jpg'                                             
+'IMG_20260826_131828.jpg'
+```
+
 ### Dim
 Show perfect dimensions according to input image ratio
 ```sh

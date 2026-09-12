@@ -12,7 +12,10 @@ def print_content_line(filename: str = "", new_filename: str = "") -> None:
 
 
 def comm_format(
-    files: list[Path], prefix: str | None = None, suffix: str | None = None
+    files: list[Path],
+    prefix: str | None = None,
+    suffix: str | None = None,
+    replace_files: bool | None = None,
 ) -> None:
     files = expand_input_paths(files)
     arrow: str = "->"
@@ -62,8 +65,8 @@ def comm_format(
             # arrow
             if arrow in suffix:
                 old_suffix, new_suffix, *_ = suffix.split(arrow)
-                # case input prefix is "->"
-                if (not old_suffix) and (not new_prefix):
+                # case input suffix is "->"
+                if (not old_suffix) and (not new_suffix):
                     print_content_line(
                         filename=f"[bright_black]'{file.name}'[/bright_black]"
                     )
@@ -83,13 +86,12 @@ def comm_format(
             elif not file.stem.endswith(suffix):
                 new_file = new_file.with_stem(f"{new_file.stem}{suffix}")
 
-        # check existence and rename
-        if new_file.exists():
+        # if nothing changed or I cannot overwrite if existing
+        if (new_file == file) or (new_file.exists() and not replace_files):
             print_content_line(filename=f"[bright_black]'{file.name}'[/bright_black]")
-            # raise NotImplementedError  # TODO
         else:
             try:
-                file.rename(new_file)
+                file.replace(new_file)
                 total_files += 1
                 print_content_line(
                     filename=f"'{file.name}'",
